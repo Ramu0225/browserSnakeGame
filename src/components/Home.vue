@@ -77,4 +77,7 @@ button {
 		transform: scale(1.25);
 	}
 }
+img {
+	width: 80%;
+}
 </style>
