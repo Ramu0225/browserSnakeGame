@@ -17,46 +17,21 @@
 	</div>
 </template>
 
-<script>
-import { ref, watch } from "vue";
-export default {
-	props: [
-		"playerName",
-		"score",
-		"gameOver",
-		"isPlaying",
-		"updateLeaderBoard",
-		"updateGameStart",
-	],
-	setup(props, { emit }) {
+<script lang="ts">
+import { ref, watch, defineComponent } from "vue";
+export default defineComponent({
+	props: {
+		playerName: String,
+		score: Number,
+		gameOver: Boolean,
+		isPlaying: Boolean,
+	},
+	setup(props) {
 		let interval = 0;
-		let gameStartTime = 0;
-		let gameEndTime = 0;
+		let gameStartTime = new Date();
+		let gameEndTime = new Date();
 		let displayGameTimeMinutes = ref("00");
 		let displayGameTimeSeconds = ref("00");
-		//const { name, score } = props;
-		watch(
-			() => props.gameOver,
-			(isGameOver) => {
-				if (isGameOver) {
-					stopTimer();
-					// TODO: get top10 members from backend and update the members every 1min
-					const snakeGameMembers = JSON.parse(
-						localStorage.getItem("snakeGame")
-					);
-					if (snakeGameMembers) {
-						snakeGameMembers.push({
-							name: props.playerName,
-							score: props.score,
-							timeElapsed: `${displayGameTimeMinutes.value}:${displayGameTimeSeconds.value}`,
-						});
-						localStorage.setItem("snakeGame", JSON.stringify(snakeGameMembers));
-						props.updateLeaderBoard(snakeGameMembers);
-					}
-					props.updateGameStart(false);
-				}
-			}
-		);
 		watch(
 			() => props.isPlaying,
 			(isPlaying) => {
@@ -64,6 +39,7 @@ export default {
 					setGameStartTimer();
 					startTimer();
 				} else {
+					stopTimer();
 					updateDisplaySeconds(0);
 					updateDisplayMinutes(0);
 				}
@@ -77,13 +53,13 @@ export default {
 			updateDisplayMinutes(gameTimeMinutes);
 			updateDisplaySeconds(gameTimeSeconds);
 		};
-		const updateDisplaySeconds = (seconds) => {
+		const updateDisplaySeconds = (seconds: number) => {
 			displayGameTimeSeconds.value =
-				seconds.toString().length === 1 ? `0${seconds}` : seconds;
+				seconds.toString().length === 1 ? `0${seconds}` : `${seconds}`;
 		};
-		const updateDisplayMinutes = (minutes) => {
+		const updateDisplayMinutes = (minutes: number) => {
 			displayGameTimeMinutes.value =
-				minutes.toString().length === 1 ? `0${minutes}` : minutes;
+				minutes.toString().length === 1 ? `0${minutes}` : `${minutes}`;
 		};
 		const setEndTimer = () => {
 			gameEndTime = new Date();
@@ -98,7 +74,6 @@ export default {
 		const stopTimer = () => {
 			clearInterval(interval);
 		};
-
 		const timeDiff = () => {
 			return gameEndTime.getTime() - gameStartTime.getTime();
 		};
@@ -115,7 +90,7 @@ export default {
 			updateDisplayMinutes,
 		};
 	},
-};
+});
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->

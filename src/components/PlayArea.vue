@@ -2,6 +2,12 @@
 	<div class="container">
 		<div class="game">
 			<div>
+				<PlayerInfo
+					:score="score"
+					:playerName="playerName"
+					:gameOver="gameOver"
+					:isPlaying="isPlaying"
+				></PlayerInfo>
 				<canvas width="500" height="500" class="canvas" ref="playArea"></canvas>
 			</div>
 			<div class="board"></div>
@@ -9,12 +15,13 @@
 	</div>
 </template>
 <script lang="ts">
+import PlayerInfo from "@/components/PlayerInfo.vue";
 import { defineComponent, onMounted, ref, watch, computed } from "vue";
 type Direction = "e" | "n" | "s" | "w" | "";
 export default defineComponent({
 	name: "PlayArea",
-	components: {},
-	setup(props, { emit }) {
+	components: { PlayerInfo },
+	setup() {
 		const playArea = ref<HTMLCanvasElement | null>(null);
 		let context: CanvasRenderingContext2D | null;
 		const direction = ref<Direction>("");
@@ -27,13 +34,38 @@ export default defineComponent({
 			[110, 120],
 			[120, 120],
 		]);
+		const playerName = ref("");
+		const isPlaying = ref(false);
 		let appleX = 0;
 		let appleY = 0;
 		let snakeLength = 3;
 		let blockSize = 10;
 		let speed = 200;
 		let interval = 0;
-
+		const snakeAteApple = computed(() => {
+			return appleX === snakeHeadX.value && appleY === snakeHeadY.value;
+		});
+		const gameOver = computed(() => {
+			return (
+				isSnakeCollide.value ||
+				snakeHeadX.value < 0 ||
+				snakeHeadY.value < 0 ||
+				snakeHeadX.value > 490 ||
+				snakeHeadY.value > 490
+			);
+		});
+		const isSnakeCollide = computed(() => {
+			return (snakeBody.value || []).some(([x, y], i) => {
+				return (
+					i !== snakeBody.value.length - 1 &&
+					x === snakeHeadX.value &&
+					y === snakeHeadY.value
+				);
+			});
+		});
+		const updateGameStart = (value: boolean) => {
+			isPlaying.value = value;
+		};
 		const handleArrowKeys = (e: KeyboardEvent) => {
 			switch (e.key.toLowerCase()) {
 				case "arrowright":
@@ -85,9 +117,9 @@ export default defineComponent({
 			if (gameOver.value) {
 				return;
 			}
-			//if (newDirection) {
-			//this.updateGameStart(true);
-			// }
+			if (newDirection) {
+				updateGameStart(true);
+			}
 			interval = setInterval(() => excuteDirection(newDirection), speed);
 		});
 		const excuteDirection = (direction: Direction) => {
@@ -112,6 +144,12 @@ export default defineComponent({
 			}
 			moveSnake();
 		};
+		watch(gameOver, (isGameOver) => {
+			if (isGameOver) {
+				updateGameStart(false);
+			}
+		});
+
 		const moveSnake = () => {
 			if (snakeAteApple.value) {
 				snakeLength += 1;
@@ -151,27 +189,7 @@ export default defineComponent({
 		const getRandomInt = () => {
 			return Math.floor(Math.random() * 49) * blockSize;
 		};
-		const snakeAteApple = computed(() => {
-			return appleX === snakeHeadX.value && appleY === snakeHeadY.value;
-		});
-		const gameOver = computed(() => {
-			return (
-				isSnakeCollide.value ||
-				snakeHeadX.value < 0 ||
-				snakeHeadY.value < 0 ||
-				snakeHeadX.value > 490 ||
-				snakeHeadY.value > 490
-			);
-		});
-		const isSnakeCollide = computed(() => {
-			return (snakeBody.value || []).some(([x, y], i) => {
-				return (
-					i !== snakeBody.value.length - 1 &&
-					x === snakeHeadX.value &&
-					y === snakeHeadY.value
-				);
-			});
-		});
+
 		onMounted(() => {
 			window.addEventListener("keydown", handleArrowKeys);
 			const canvas = playArea.value;
@@ -183,7 +201,14 @@ export default defineComponent({
 			//const players = JSON.parse(localStorage.getItem("snakeGame"));
 			//this.updateTop10Members(players);
 		});
-		return { playArea, score };
+		return {
+			playArea,
+			score,
+			playerName,
+			gameOver,
+			isPlaying,
+			updateGameStart,
+		};
 	},
 });
 </script>
