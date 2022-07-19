@@ -19,19 +19,20 @@ export default defineComponent({
 		let context: CanvasRenderingContext2D | null;
 		const direction = ref<Direction>("");
 
-		let snakeHeadX = 120;
-		let snakeHeadY = 120;
+		const snakeHeadX = ref(120);
+		const snakeHeadY = ref(120);
+		const score = ref(0);
+		const snakeBody = ref([
+			[100, 120],
+			[110, 120],
+			[120, 120],
+		]);
 		let appleX = 0;
 		let appleY = 0;
 		let snakeLength = 3;
 		let blockSize = 10;
 		let speed = 200;
 		let interval = 0;
-		let snakeBody = [
-			[100, 120],
-			[110, 120],
-			[120, 120],
-		];
 
 		const handleArrowKeys = (e: KeyboardEvent) => {
 			switch (e.key) {
@@ -61,12 +62,20 @@ export default defineComponent({
 			clearInterval(interval);
 		};
 		const drawSnake = () => {
-			snakeBody.forEach((part) => {
+			snakeBody.value.forEach((part) => {
 				if (context) {
 					context.fillStyle = "black";
 					context.fillRect(part[0], part[1], blockSize, blockSize);
 				}
 			});
+		};
+		const drawApple = () => {
+			if (context) {
+				context.fillStyle = "red";
+				appleX = getRandomInt();
+				appleY = getRandomInt();
+				context.fillRect(appleX, appleY, blockSize, blockSize);
+			}
 		};
 		watch(direction, (newDirection) => {
 			// if (this.gameOver) {
@@ -85,16 +94,16 @@ export default defineComponent({
 
 			switch (direction) {
 				case "e":
-					snakeHeadX += blockSize;
+					snakeHeadX.value += blockSize;
 					break;
 				case "s":
-					snakeHeadY += blockSize;
+					snakeHeadY.value += blockSize;
 					break;
 				case "w":
-					snakeHeadX -= blockSize;
+					snakeHeadX.value -= blockSize;
 					break;
 				case "n":
-					snakeHeadY -= blockSize;
+					snakeHeadY.value -= blockSize;
 					break;
 			}
 			moveSnake();
@@ -102,8 +111,8 @@ export default defineComponent({
 		const moveSnake = () => {
 			if (snakeAteApple.value) {
 				snakeLength += 1;
-				//updateScore();
-				//drawApple();
+				updateScore();
+				drawApple();
 			}
 			if (!context) {
 				return;
@@ -111,13 +120,17 @@ export default defineComponent({
 			if (gameOver.value) {
 				return;
 			}
-			snakeBody.push([snakeHeadX, snakeHeadY]);
-
+			snakeBody.value.push([snakeHeadX.value, snakeHeadY.value]);
 			context.fillStyle = "black";
 			context.strokeStyle = "yellow";
-			context.fillRect(snakeHeadX, snakeHeadY, blockSize, blockSize);
-			if (snakeBody.length > snakeLength) {
-				const firstBodyPart = snakeBody.shift();
+			context.fillRect(
+				snakeHeadX.value,
+				snakeHeadY.value,
+				blockSize,
+				blockSize
+			);
+			if (snakeBody.value.length > snakeLength) {
+				const firstBodyPart = snakeBody.value.shift();
 				if (firstBodyPart) {
 					context.clearRect(
 						firstBodyPart[0],
@@ -128,22 +141,30 @@ export default defineComponent({
 				}
 			}
 		};
+		const updateScore = () => {
+			score.value++;
+		};
+		const getRandomInt = () => {
+			return Math.floor(Math.random() * 49) * blockSize;
+		};
 		const snakeAteApple = computed(() => {
-			return appleX === snakeHeadX && appleY === snakeHeadY;
+			return appleX === snakeHeadX.value && appleY === snakeHeadY.value;
 		});
 		const gameOver = computed(() => {
 			return (
 				isSnakeCollide.value ||
-				snakeHeadX < 0 ||
-				snakeHeadY < 0 ||
-				snakeHeadX > 490 ||
-				snakeHeadY > 490
+				snakeHeadX.value < 0 ||
+				snakeHeadY.value < 0 ||
+				snakeHeadX.value > 490 ||
+				snakeHeadY.value > 490
 			);
 		});
 		const isSnakeCollide = computed(() => {
-			return (snakeBody || []).some(([x, y], i) => {
+			return (snakeBody.value || []).some(([x, y], i) => {
 				return (
-					i !== snakeBody.length - 1 && x === snakeHeadX && y === snakeHeadY
+					i !== snakeBody.value.length - 1 &&
+					x === snakeHeadX.value &&
+					y === snakeHeadY.value
 				);
 			});
 		});
@@ -154,8 +175,11 @@ export default defineComponent({
 				context = canvas.getContext("2d");
 			}
 			drawSnake();
+			drawApple();
+			//const players = JSON.parse(localStorage.getItem("snakeGame"));
+			//this.updateTop10Members(players);
 		});
-		return { playArea };
+		return { playArea, score };
 	},
 });
 </script>
