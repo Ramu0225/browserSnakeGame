@@ -35,23 +35,27 @@ export default defineComponent({
 		let interval = 0;
 
 		const handleArrowKeys = (e: KeyboardEvent) => {
-			switch (e.key) {
-				case "ArrowRight":
+			switch (e.key.toLowerCase()) {
+				case "arrowright":
+				case "d":
 					if (direction.value === "w" || direction.value === "e") return;
 					pause();
 					direction.value = "e";
 					break;
-				case "ArrowDown":
+				case "arrowdown":
+				case "s":
 					if (direction.value === "n" || direction.value === "s") return;
 					pause();
 					direction.value = "s";
 					break;
-				case "ArrowLeft":
+				case "arrowleft":
+				case "a":
 					if (direction.value === "e" || direction.value === "w") return;
 					pause();
 					direction.value = "w";
 					break;
-				case "ArrowUp":
+				case "arrowup":
+				case "w":
 					if (direction.value === "s" || direction.value === "n") return;
 					pause();
 					direction.value = "n";
