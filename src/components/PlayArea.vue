@@ -1,4 +1,28 @@
 <template>
+	<PlayerModal
+		@close="closeModal"
+		:modalActive="modalActive"
+		:buttonDisabled="!playerName"
+		@restart="restartGame"
+		@restartGameOnSwitchingUser="restartGameOnSwitchingUser"
+		:gameOverModal="isGameOverDialog"
+	>
+		<div class="modal-content">
+			<div v-if="isGameOverDialog">
+				<div>
+					<h1>Game over</h1>
+				</div>
+			</div>
+			<div v-else>
+				<input
+					type="text"
+					v-model="playerName"
+					maxlength="15"
+					placeholder="Enter Player name"
+				/>
+			</div>
+		</div>
+	</PlayerModal>
 	<div class="container">
 		<div class="game">
 			<div>
@@ -18,8 +42,10 @@
 	</div>
 </template>
 <script lang="ts">
+
 import PlayerInfo from "@/components/PlayerInfo.vue";
 import LeaderBoard from "@/components/LeaderBoard.vue";
+import PlayerModal from "@/components/PlayerModal.vue";
 
 import { defineComponent, onMounted, ref, watch, computed } from "vue";
 
@@ -31,7 +57,7 @@ interface PlayerInfoContract {
 }
 export default defineComponent({
 	name: "PlayArea",
-	components: { PlayerInfo, LeaderBoard },
+	components: { PlayerInfo, LeaderBoard, PlayerModal },
 	setup() {
 		const playArea = ref<HTMLCanvasElement | null>(null);
 		let context: CanvasRenderingContext2D | null;
@@ -47,6 +73,8 @@ export default defineComponent({
 		]);
 		const playerName = ref("");
 		const isPlaying = ref(false);
+		const modalActive = ref(false);
+		const isGameOverDialog = ref(false);
 		let appleX = 0;
 		let appleY = 0;
 		let snakeLength = 3;
@@ -125,7 +153,12 @@ export default defineComponent({
 				context.fillRect(appleX, appleY, blockSize, blockSize);
 			}
 		};
-
+		const closeModal = () => {
+			modalActive.value = false;
+		};
+		const openModal = () => {
+			modalActive.value = true;
+		};
 		const excuteDirection = (direction: Direction) => {
 			if (gameOver.value) {
 				pause();
@@ -176,7 +209,9 @@ export default defineComponent({
 		};
 		watch(gameOver, (isGameOver) => {
 			if (isGameOver) {
-				updateGameStart(false);
+        updateGameStart(false);
+        updateGameOverDialog(true);
+        openModal();
 			}
 		});
 		watch(direction, (newDirection) => {
@@ -227,6 +262,45 @@ export default defineComponent({
 		const getRandomInt = () => {
 			return Math.floor(Math.random() * 49) * blockSize;
 		};
+		const clearPlayArea = () => {
+			if (!context) {
+				return;
+			}
+			snakeBody.value.forEach((snake) => {
+				if (context) {
+					context.clearRect(snake[0], snake[1], blockSize, blockSize);
+				}
+			});
+			context.clearRect(appleX, appleY, blockSize, blockSize);
+		};
+		const updateGameOverDialog = (isOpen: boolean) => {
+			isGameOverDialog.value = isOpen;
+		};
+
+		const restartGame = () => {
+			clearPlayArea();
+			snakeBody.value = [
+				[100, 120],
+				[110, 120],
+				[120, 120],
+			];
+			snakeLength = 3;
+			direction.value = "";
+			isPlaying.value = false;
+			snakeHeadX.value = 120;
+			snakeHeadY.value = 120;
+			drawSnake();
+			drawApple();
+			score.value = 0;
+			updateGameOverDialog(false);
+			closeModal();
+		};
+		const restartGameOnSwitchingUser = () => {
+			restartGame();
+			playerName.value = "";
+			updateGameOverDialog(false);
+			openModal();
+		};
 
 		onMounted(() => {
 			window.addEventListener("keydown", handleArrowKeys);
@@ -239,7 +313,8 @@ export default defineComponent({
 			const players = localStorage.getItem("snakeGame");
 			const parsedPlayers = players ? JSON.parse(players) : [];
 			console.log(parsedPlayers);
-			updateTop10Members(parsedPlayers);
+      updateTop10Members(parsedPlayers);
+      openModal();
 		});
 		return {
 			playArea,
@@ -250,6 +325,12 @@ export default defineComponent({
 			updateGameStart,
 			top10Players,
 			updateTop10Members,
+			modalActive,
+			closeModal,
+			restartGame,
+			restartGameOnSwitchingUser,
+      isGameOverDialog,
+      
 		};
 	},
 });
