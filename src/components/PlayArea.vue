@@ -42,12 +42,18 @@
 	</div>
 </template>
 <script lang="ts">
-
 import PlayerInfo from "@/components/PlayerInfo.vue";
 import LeaderBoard from "@/components/LeaderBoard.vue";
 import PlayerModal from "@/components/PlayerModal.vue";
 
-import { defineComponent, onMounted, ref, watch, computed } from "vue";
+import {
+	defineComponent,
+	onMounted,
+	ref,
+	watch,
+	computed,
+	onUnmounted,
+} from "vue";
 
 type Direction = "e" | "n" | "s" | "w" | "";
 interface PlayerInfoContract {
@@ -155,6 +161,7 @@ export default defineComponent({
 		};
 		const closeModal = () => {
 			modalActive.value = false;
+			addEventListners();
 		};
 		const openModal = () => {
 			modalActive.value = true;
@@ -209,17 +216,14 @@ export default defineComponent({
 		};
 		watch(gameOver, (isGameOver) => {
 			if (isGameOver) {
-        updateGameStart(false);
-        updateGameOverDialog(true);
-        openModal();
+				updateGameStart(false);
+				updateGameOverDialog(true);
+				openModal();
 			}
 		});
 		watch(direction, (newDirection) => {
 			if (gameOver.value) {
 				return;
-			}
-			if (newDirection) {
-				updateGameStart(true);
 			}
 			interval = setInterval(() => excuteDirection(newDirection), speed);
 		});
@@ -301,9 +305,13 @@ export default defineComponent({
 			updateGameOverDialog(false);
 			openModal();
 		};
-
+		const addEventListners = () => {
+			if (playerName.value) {
+				updateGameStart(true);
+				window.addEventListener("keydown", handleArrowKeys);
+			}
+		};
 		onMounted(() => {
-			window.addEventListener("keydown", handleArrowKeys);
 			const canvas = playArea.value;
 			if (canvas) {
 				context = canvas.getContext("2d");
@@ -313,8 +321,11 @@ export default defineComponent({
 			const players = localStorage.getItem("snakeGame");
 			const parsedPlayers = players ? JSON.parse(players) : [];
 			console.log(parsedPlayers);
-      updateTop10Members(parsedPlayers);
-      openModal();
+			updateTop10Members(parsedPlayers);
+			openModal();
+		});
+		onUnmounted(() => {
+			window.removeEventListener("keydown", handleArrowKeys);
 		});
 		return {
 			playArea,
@@ -329,8 +340,7 @@ export default defineComponent({
 			closeModal,
 			restartGame,
 			restartGameOnSwitchingUser,
-      isGameOverDialog,
-      
+			isGameOverDialog,
 		};
 	},
 });
