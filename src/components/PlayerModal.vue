@@ -6,14 +6,14 @@
 					<!-- Modal Content -->
 					<slot />
 					<div v-if="gameOverModal">
-						<button @click="restart" type="button">Play Again</button>
-						<button @click="restartGameOnSwitchingUser" type="button">
+						<button @click="restart" class = "btn-play" type="button">Play Again</button>
+						<button @click="restartGameOnSwitchingUser" class = "btn-play" type="button">
 							Switch User
 						</button>
 					</div>
 					<div v-else>
-						<button @click="close" type="button" :disabled="buttonDisabled">
-							Play
+						<button @click="close" class = "btn-play" type="button" :disabled="buttonDisabled">
+							Play!
 						</button>
 					</div>
 				</div>
@@ -79,26 +79,25 @@ export default defineComponent({
 	left: 0;
 	background-color: rgba(255, 255, 255, 0.7);
 	.modal-container {
+		
 		display: flex;
-		justify-content: space-around;
+		justify-content: space-between;
 		align-items: center;
-		flex-direction: row;
-		width: 400px;
+		flex-direction: column;
+		width: 300px;
 		border-radius: 5px;
 		background-color: #fff;
 		padding: 10px;
-		button {
-			padding: 10px 20px;
-			border: none;
-			background-color: rgb(4, 8, 32);
-			border-radius: 5px;
-			color: #fff;
-			cursor: pointer;
+	
+		}
+		.btn-play{
+			margin: 10px;
+			color:rgb(39, 93, 39);
 		}
 		button[disabled] {
 			pointer-events: none;
-			background-color: rgb(145, 150, 181);
+			
 		}
 	}
-}
+
 </style>

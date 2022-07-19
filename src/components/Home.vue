@@ -5,7 +5,7 @@
 				src="https://see.fontimg.com/api/renderfont4/mLZ3a/eyJyIjoiZnMiLCJoIjo1MSwidyI6MTAwMCwiZnMiOjUxLCJmZ2MiOiIjNzc0QzExIiwiYmdjIjoiI0ZGRkZGRiIsInQiOjF9/V2VsY29tZSB0byBzbmFrZSBnYW1l/terasong.png"
 				alt="Welcome to Snake game"
 			/>
-			<button @click="handleShowPlayerArea">
+			<button @click="handleShowPlayerArea" class="btn-welcomepage">
 				<img
 					src="https://see.fontimg.com/api/renderfont4/mLZ3a/eyJyIjoiZnMiLCJoIjoxNywidyI6MTAwMCwiZnMiOjE3LCJmZ2MiOiIjMDI0MTA2IiwiYmdjIjoiI0ZGRkZGRiIsInQiOjF9/U3RhcnQgR2FtZQ/terasong.png"
 					alt=""
@@ -58,25 +58,7 @@ h3 {
 	width: 50vw;
 }
 
-button {
-	padding: 10px 20px;
-	border: 1px solid #ac6c41;
-	box-shadow: inset 0px 0px 0px 5px #97b738;
-	border-radius: 30px;
-	background-image: linear-gradient(
-		rgb(231, 215, 215) 0,
-		rgba(209, 88, 24, 0.4) 100%
-	);
-	background-color: rgb(209, 88, 24);
-	border-radius: 30px;
-	color: #fff;
-	cursor: pointer;
-	transition: all 0.5s;
-	&:hover {
-		background-color: #97b738;
-		transform: scale(1.25);
-	}
-}
+
 img {
 	width: 80%;
 }

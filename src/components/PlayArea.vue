@@ -8,10 +8,8 @@
 		:gameOverModal="isGameOverDialog"
 	>
 		<div class="modal-content">
-			<div v-if="isGameOverDialog">
-				<div>
-					<h1>Game over</h1>
-				</div>
+			<div v-if="isGameOverDialog" class="gameover">
+				<h1>Game over!</h1>
 			</div>
 			<div v-else>
 				<input
@@ -36,7 +34,7 @@
 				<canvas width="500" height="500" class="canvas" ref="playArea"></canvas>
 			</div>
 			<div class="board">
-				<LeaderBoard :list="top10Players"></LeaderBoard>
+				<LeaderBoard :players="top10Players"></LeaderBoard>
 			</div>
 		</div>
 	</div>
@@ -87,7 +85,7 @@ export default defineComponent({
 		let blockSize = 10;
 		let speed = 200;
 		let interval = 0;
-		let top10Players: Array<PlayerInfoContract> = [];
+		let top10Players = ref<Array<PlayerInfoContract>>([]);
 		const snakeAteApple = computed(() => {
 			return appleX === snakeHeadX.value && appleY === snakeHeadY.value;
 		});
@@ -161,7 +159,7 @@ export default defineComponent({
 		};
 		const closeModal = () => {
 			modalActive.value = false;
-			addEventListners();
+			//addEventListners();
 		};
 		const openModal = () => {
 			modalActive.value = true;
@@ -190,7 +188,7 @@ export default defineComponent({
 		};
 		const updateTop10Members = (players: Array<PlayerInfoContract>) => {
 			if (!players) {
-				top10Players = [];
+				top10Players.value = [];
 				return;
 			}
 			const sortedMembers = players.sort((a, b) => {
@@ -209,9 +207,9 @@ export default defineComponent({
 				}
 			});
 			if (players.length < 10) {
-				top10Players = sortedMembers;
+				top10Players.value = sortedMembers;
 			} else {
-				top10Players = sortedMembers.slice(0, 10);
+				top10Players.value = sortedMembers.slice(0, 10);
 			}
 		};
 		watch(gameOver, (isGameOver) => {
@@ -359,7 +357,8 @@ input {
 	border: 2px solid black;
 	border-radius: 5px;
 }
-
+.gameover {
+}
 .container {
 	display: flex;
 	flex-direction: column;

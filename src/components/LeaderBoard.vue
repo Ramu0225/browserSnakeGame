@@ -6,7 +6,7 @@
 			<div>Score</div>
 			<div>Time</div>
 		</li>
-		<li class="table" v-for="(item, index) in list" :key="index">
+		<li class="table" v-for="(item, index) in players" :key="index">
 			<div>{{ item.name }}</div>
 			<div>{{ item.score }}</div>
 			<div>{{ item.timeElapsed || 0 }}</div>
@@ -16,9 +16,11 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-
 export default defineComponent({
-	props: ["list"],
+	props: ["players"],
+	setup(props) {
+		console.log(props);
+	},
 });
 </script>
 
