@@ -38,8 +38,8 @@ export default defineComponent({
 			switch (e.key) {
 				case "ArrowRight":
 					if (direction.value === "w" || direction.value === "e") return;
-					direction.value = "e";
 					pause();
+					direction.value = "e";
 					break;
 				case "ArrowDown":
 					if (direction.value === "n" || direction.value === "s") return;
@@ -78,19 +78,19 @@ export default defineComponent({
 			}
 		};
 		watch(direction, (newDirection) => {
-			// if (this.gameOver) {
-			// 	return;
-			// }
-			// if (newDirection) {
-			// 	this.updateGameStart(true);
+			if (gameOver.value) {
+				return;
+			}
+			//if (newDirection) {
+			//this.updateGameStart(true);
 			// }
 			interval = setInterval(() => excuteDirection(newDirection), speed);
 		});
 		const excuteDirection = (direction: Direction) => {
-			// if (this.gameOver) {
-			// 	this.pause();
-			// 	return;
-			// }
+			if (gameOver.value) {
+				pause();
+				return;
+			}
 
 			switch (direction) {
 				case "e":
