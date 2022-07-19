@@ -25,6 +25,7 @@ export default defineComponent({
 		score: Number,
 		gameOver: Boolean,
 		isPlaying: Boolean,
+		updateLeaderBoard: Function,
 	},
 	setup(props) {
 		let interval = 0;
@@ -40,6 +41,18 @@ export default defineComponent({
 					startTimer();
 				} else {
 					stopTimer();
+					// TODO: get top10 members from backend and update the members every 1min
+					const players = localStorage.getItem("snakeGame");
+					const snakeGameMembers = players ? JSON.parse(players) : [];
+					if (snakeGameMembers) {
+						snakeGameMembers.push({
+							name: props.playerName,
+							score: props.score,
+							timeElapsed: `${displayGameTimeMinutes.value}:${displayGameTimeSeconds.value}`,
+						});
+						localStorage.setItem("snakeGame", JSON.stringify(snakeGameMembers));
+						props.updateLeaderBoard(snakeGameMembers);
+					}
 					updateDisplaySeconds(0);
 					updateDisplayMinutes(0);
 				}

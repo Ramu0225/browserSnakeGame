@@ -7,20 +7,31 @@
 					:playerName="playerName"
 					:gameOver="gameOver"
 					:isPlaying="isPlaying"
+					:updateLeaderBoard="updateTop10Members"
 				></PlayerInfo>
 				<canvas width="500" height="500" class="canvas" ref="playArea"></canvas>
 			</div>
-			<div class="board"></div>
+			<div class="board">
+				<LeaderBoard :list="top10Players"></LeaderBoard>
+			</div>
 		</div>
 	</div>
 </template>
 <script lang="ts">
 import PlayerInfo from "@/components/PlayerInfo.vue";
+import LeaderBoard from "@/components/LeaderBoard.vue";
+
 import { defineComponent, onMounted, ref, watch, computed } from "vue";
+
 type Direction = "e" | "n" | "s" | "w" | "";
+interface PlayerInfoContract {
+	name: string;
+	score: number;
+	timeElapsed: string;
+}
 export default defineComponent({
 	name: "PlayArea",
-	components: { PlayerInfo },
+	components: { PlayerInfo, LeaderBoard },
 	setup() {
 		const playArea = ref<HTMLCanvasElement | null>(null);
 		let context: CanvasRenderingContext2D | null;
@@ -42,6 +53,7 @@ export default defineComponent({
 		let blockSize = 10;
 		let speed = 200;
 		let interval = 0;
+		let top10Players: Array<PlayerInfoContract> = [];
 		const snakeAteApple = computed(() => {
 			return appleX === snakeHeadX.value && appleY === snakeHeadY.value;
 		});
@@ -113,15 +125,7 @@ export default defineComponent({
 				context.fillRect(appleX, appleY, blockSize, blockSize);
 			}
 		};
-		watch(direction, (newDirection) => {
-			if (gameOver.value) {
-				return;
-			}
-			if (newDirection) {
-				updateGameStart(true);
-			}
-			interval = setInterval(() => excuteDirection(newDirection), speed);
-		});
+
 		const excuteDirection = (direction: Direction) => {
 			if (gameOver.value) {
 				pause();
@@ -144,12 +148,46 @@ export default defineComponent({
 			}
 			moveSnake();
 		};
+		const updateTop10Members = (players: Array<PlayerInfoContract>) => {
+			if (!players) {
+				top10Players = [];
+				return;
+			}
+			const sortedMembers = players.sort((a, b) => {
+				if (a.score === b.score) {
+					const timeElapsed1 = a.timeElapsed
+						.split(":")
+						.map((t) => Number(t) || 0);
+					const timeElapsed2 = b.timeElapsed
+						.split(":")
+						.map((t) => Number(t) || 0);
+					const timeElapsed1Sec = timeElapsed1[0] * 60 + timeElapsed1[1];
+					const timeElapsed2Sec = timeElapsed2[0] * 60 + timeElapsed2[1];
+					return timeElapsed1Sec - timeElapsed2Sec;
+				} else {
+					return b.score - a.score;
+				}
+			});
+			if (players.length < 10) {
+				top10Players = sortedMembers;
+			} else {
+				top10Players = sortedMembers.slice(0, 10);
+			}
+		};
 		watch(gameOver, (isGameOver) => {
 			if (isGameOver) {
 				updateGameStart(false);
 			}
 		});
-
+		watch(direction, (newDirection) => {
+			if (gameOver.value) {
+				return;
+			}
+			if (newDirection) {
+				updateGameStart(true);
+			}
+			interval = setInterval(() => excuteDirection(newDirection), speed);
+		});
 		const moveSnake = () => {
 			if (snakeAteApple.value) {
 				snakeLength += 1;
@@ -198,8 +236,10 @@ export default defineComponent({
 			}
 			drawSnake();
 			drawApple();
-			//const players = JSON.parse(localStorage.getItem("snakeGame"));
-			//this.updateTop10Members(players);
+			const players = localStorage.getItem("snakeGame");
+			const parsedPlayers = players ? JSON.parse(players) : [];
+			console.log(parsedPlayers);
+			updateTop10Members(parsedPlayers);
 		});
 		return {
 			playArea,
@@ -208,6 +248,8 @@ export default defineComponent({
 			gameOver,
 			isPlaying,
 			updateGameStart,
+			top10Players,
+			updateTop10Members,
 		};
 	},
 });
