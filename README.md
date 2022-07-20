@@ -15,6 +15,7 @@ npm install
 ```
 npm run serve
 ```
+Then, the application is ready to run at localhost:8080.
 
 ### Compiles and minifies for production
 ```
@@ -30,4 +31,4 @@ npm run lint
 See [Configuration Reference](https://cli.vuejs.org/config/).
 
 ## Screenshots:
-![Snake-Game](C:\Users\ramu0\OneDrive\Desktop\Games\sg_welcome_page.jpg)
+![Snake-Game](C:\Users\ramu0\OneDrive\Desktop\Games\sg_welcome_page.jpg?raw=true "sg_welcome_page")
