@@ -18,7 +18,7 @@
 		</div>
 		<div class="square">
 			<div class="icon-circle">
-				<img src="https://img.icons8.com/ios/18/000000/hourglass.png" />
+				<img src="https://img.icons8.com/material-rounded/20/000000/alarm-clock--v1.png"/>
 			</div>
 			{{ `${displayGameTimeMinutes}:${displayGameTimeSeconds}` }}
 		</div>

@@ -136,26 +136,30 @@ export default defineComponent({
 					addObstacles();
 					return;
 				}
-				var gradient = context.createRadialGradient(
-					obstacleCordinates[0] + blockSize / 2,
-					obstacleCordinates[1] + blockSize / 2,
-					2,
-					obstacleCordinates[0] + blockSize / 2,
-					obstacleCordinates[1] + blockSize / 2,
-					5
-				);
-				gradient.addColorStop(0, "yellow");
-				gradient.addColorStop(1, "red");
+				
+				
 				context.beginPath();
 				context.arc(
 					obstacleCordinates[0] + blockSize / 2,
 					obstacleCordinates[1] + blockSize / 2,
-					blockSize / 2 - 1,
+					blockSize / 2.5 - 1,
 					0,
 					(2 * Math.PI) / 2,
-					false
+					true
 				);
-				context.fillStyle = gradient;
+				context.fillStyle = "black";
+				context.fill();
+				context.beginPath();
+				context.arc(
+					obstacleCordinates[0] + blockSize/5 ,
+					obstacleCordinates[1] + blockSize/3 ,
+					blockSize / 2 - 1,
+
+					(2 * Math.PI) / 4,
+					0,
+				true
+				);
+				context.fillStyle = "black";
 				context.fill();
 			}
 		};
@@ -212,25 +216,75 @@ export default defineComponent({
 					const x = part[0] + blockSize / 2;
 					const y = part[1] + blockSize / 2;
 					const radius = blockSize / 2;
-					drawCircle(x, y, radius, false, "black");
+					drawCircle(x, y, radius, false, "blue");
 					if (snakeBody.value.length - 1 === i) {
-						const eye1X = part[0] +blockSize / 1.5;
-						const eye1Y = part[1] + blockSize / 3;
+						const eyeDirection = getEyeDirection();
+						const eye1X = eyeDirection?.eye1[0] || -1;
+						const eye1Y = eyeDirection?.eye1[1] || -1;
 						const eyeRadius = 2;
 						drawCircle(eye1X, eye1Y, eyeRadius, false, "yellow");
-						const eye2X = part[0] +blockSize/ 1.5;
-						const eye2Y = part[1] +blockSize/ 1.5;
+						const eye2X = eyeDirection?.eye2[0] || -1;
+						const eye2Y = eyeDirection?.eye2[1] || -1;
 						drawCircle(eye2X, eye2Y, eyeRadius, false, "yellow");
-						context.fillStyle = "red";
-						context.lineWidth = 2;
-						context.beginPath();
-						context.moveTo(part[0] + blockSize / 2, part[1] + blockSize / 2);
-						context.lineTo(part[0] + dx, part[1] + dy);
-						context.stroke();
-						context.fill();
+
+						// context.lineWidth = 2;
+						// context.beginPath();
+						// context.moveTo(part[0]+blockSize / 2 , part[1]+blockSize / 2 );
+						// context.lineTo(part[0] + blockSize+10 , part[1] + blockSize/2 );
+						// context.stroke();
 					}
 				}
 			});
+		};
+
+		const getEyeDirection = () => {
+			const snakeHead = snakeBody.value[snakeBody.value.length - 1];
+			switch (direction.value) {
+				case "e":
+					return {
+						eye1: [
+							snakeHead[0] + blockSize / 1.5,
+							snakeHead[1] + blockSize / 3,
+						],
+						eye2: [
+							snakeHead[0] + blockSize / 1.5,
+							snakeHead[1] + blockSize / 1.5,
+						],
+					};
+					case "w":
+					return {
+						eye2: [
+							snakeHead[0] + blockSize / 3,
+							snakeHead[1] + blockSize / 1.5,
+						],
+						eye1: [
+							snakeHead[0] + blockSize / 3,
+							snakeHead[1] + blockSize / 3,
+						],
+					};
+					case "n":
+					return {
+						eye1: [
+							snakeHead[0] + blockSize / 1.5,
+							snakeHead[1] + blockSize / 3,
+						],
+						eye2: [
+							snakeHead[0] + blockSize / 3,
+							snakeHead[1] + blockSize / 3,
+						],
+					};
+					case "s":
+					return {
+						eye1: [
+							snakeHead[0] + blockSize /1.5,
+							snakeHead[1] + blockSize /1.5,
+						],
+						eye2: [
+							snakeHead[0] + blockSize / 3,
+							snakeHead[1] + blockSize / 1.5,
+						],
+					};
+			}
 		};
 		const drawApple = () => {
 			if (context) {
@@ -436,6 +490,7 @@ export default defineComponent({
 			}
 			drawSnake();
 			drawApple();
+			addObstacles();
 			const players = localStorage.getItem("snakeGame");
 			const parsedPlayers = players ? JSON.parse(players) : [];
 			updateTop10Members(parsedPlayers);

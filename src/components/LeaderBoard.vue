@@ -9,9 +9,11 @@
 		<div class="table-list">
 			<ul>
 				<li class="table heading">
-					<div>Player</div>
-					<div>Score</div>
-					<div>Time</div>
+					<div><img
+						src="https://img.icons8.com/pastel-glyph/22/000000/person-male--v3.png"
+					/></div>
+					<div><img src="https://img.icons8.com/doodle/20/000000/apple.png" /></div>
+					<div><img src="https://img.icons8.com/material-rounded/21/000000/alarm-clock--v1.png"/></div>
 				</li>
 				<li class="table" v-for="(item, index) in players" :key="index">
 					<div v-if="index == 0" class="table-img">
@@ -71,7 +73,7 @@ ul {
 }
 .table {
 	display: grid;
-	grid-template-columns: 3fr 3fr 2fr;
+	grid-template-columns: 3fr 2fr 3fr;
 	max-width: 320px;
 	padding: 10px;
 	font-style: italic;
