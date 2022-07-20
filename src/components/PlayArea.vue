@@ -71,8 +71,8 @@ export default defineComponent({
 		const playArea = ref<HTMLCanvasElement | null>(null);
 		let context: CanvasRenderingContext2D | null;
 		const direction = ref<Direction>("e");
-		let dx = 0;
-		let dy = 0;
+		let moveX = 0;
+		let moveY = 0;
 		const score = ref(0);
 		let snakeBody = ref([
 			[80, 120],
@@ -132,12 +132,10 @@ export default defineComponent({
 					obstacleCordinates[1]
 				);
 				if (hasSnakeCordinates) {
-					console.log("has snake apple cor");
 					addObstacles();
 					return;
 				}
-				
-				
+
 				context.beginPath();
 				context.arc(
 					obstacleCordinates[0] + blockSize / 2,
@@ -151,13 +149,13 @@ export default defineComponent({
 				context.fill();
 				context.beginPath();
 				context.arc(
-					obstacleCordinates[0] + blockSize/5 ,
-					obstacleCordinates[1] + blockSize/3 ,
+					obstacleCordinates[0] + blockSize / 5,
+					obstacleCordinates[1] + blockSize / 3,
 					blockSize / 2 - 1,
 
 					(2 * Math.PI) / 4,
 					0,
-				true
+					true
 				);
 				context.fillStyle = "black";
 				context.fill();
@@ -226,12 +224,6 @@ export default defineComponent({
 						const eye2X = eyeDirection?.eye2[0] || -1;
 						const eye2Y = eyeDirection?.eye2[1] || -1;
 						drawCircle(eye2X, eye2Y, eyeRadius, false, "yellow");
-
-						// context.lineWidth = 2;
-						// context.beginPath();
-						// context.moveTo(part[0]+blockSize / 2 , part[1]+blockSize / 2 );
-						// context.lineTo(part[0] + blockSize+10 , part[1] + blockSize/2 );
-						// context.stroke();
 					}
 				}
 			});
@@ -251,33 +243,27 @@ export default defineComponent({
 							snakeHead[1] + blockSize / 1.5,
 						],
 					};
-					case "w":
+				case "w":
 					return {
 						eye2: [
 							snakeHead[0] + blockSize / 3,
 							snakeHead[1] + blockSize / 1.5,
 						],
-						eye1: [
-							snakeHead[0] + blockSize / 3,
-							snakeHead[1] + blockSize / 3,
-						],
+						eye1: [snakeHead[0] + blockSize / 3, snakeHead[1] + blockSize / 3],
 					};
-					case "n":
+				case "n":
 					return {
 						eye1: [
 							snakeHead[0] + blockSize / 1.5,
 							snakeHead[1] + blockSize / 3,
 						],
-						eye2: [
-							snakeHead[0] + blockSize / 3,
-							snakeHead[1] + blockSize / 3,
-						],
+						eye2: [snakeHead[0] + blockSize / 3, snakeHead[1] + blockSize / 3],
 					};
-					case "s":
+				case "s":
 					return {
 						eye1: [
-							snakeHead[0] + blockSize /1.5,
-							snakeHead[1] + blockSize /1.5,
+							snakeHead[0] + blockSize / 1.5,
+							snakeHead[1] + blockSize / 1.5,
 						],
 						eye2: [
 							snakeHead[0] + blockSize / 3,
@@ -292,7 +278,6 @@ export default defineComponent({
 				appleY = getRandomInt();
 				const hasSnakeCordinates = hasSnakeCoridnates(appleX, appleY);
 				if (hasSnakeCordinates) {
-					console.log("has snake apple cor");
 					drawApple();
 					return;
 				}
@@ -346,20 +331,20 @@ export default defineComponent({
 			direction.value = newDirection;
 			switch (newDirection) {
 				case "e":
-					dx = blockSize;
-					dy = 0;
+					moveX = blockSize;
+					moveY = 0;
 					break;
 				case "s":
-					dx = 0;
-					dy = blockSize;
+					moveX = 0;
+					moveY = blockSize;
 					break;
 				case "w":
-					dx = -blockSize;
-					dy = 0;
+					moveX = -blockSize;
+					moveY = 0;
 					break;
 				case "n":
-					dx = 0;
-					dy = -blockSize;
+					moveX = 0;
+					moveY = -blockSize;
 					break;
 			}
 			updateStartPlay(true);
@@ -407,8 +392,8 @@ export default defineComponent({
 				return;
 			}
 			snakeBody.value.push([
-				snakeBody.value[snakeBody.value.length - 1][0] + dx,
-				snakeBody.value[snakeBody.value.length - 1][1] + dy,
+				snakeBody.value[snakeBody.value.length - 1][0] + moveX,
+				snakeBody.value[snakeBody.value.length - 1][1] + moveY,
 			]);
 			if (snakeBody.value.length > snakeLength) {
 				const tail = snakeBody.value.shift();
@@ -422,7 +407,7 @@ export default defineComponent({
 			score.value++;
 		};
 		const updateSpeedLevel = () => {
-			speed /= 2;
+			speed /= 1.2;
 		};
 		const getRandomInt = () => {
 			return (
@@ -490,7 +475,7 @@ export default defineComponent({
 			}
 			drawSnake();
 			drawApple();
-			addObstacles();
+			//addObstacles();
 			const players = localStorage.getItem("snakeGame");
 			const parsedPlayers = players ? JSON.parse(players) : [];
 			updateTop10Members(parsedPlayers);
@@ -515,7 +500,7 @@ export default defineComponent({
 			}
 		});
 		watch(score, (newScore) => {
-			if (newScore !== 0 && newScore % 2 === 0) {
+			if (newScore !== 0 && newScore % 5 === 0) {
 				updateSpeedLevel();
 				addObstacles();
 			}

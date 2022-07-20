@@ -8,7 +8,7 @@
 			<button @click="handleShowPlayerArea" class="btn-welcomepage">
 				<img
 					src="https://see.fontimg.com/api/renderfont4/mLZ3a/eyJyIjoiZnMiLCJoIjoxNywidyI6MTAwMCwiZnMiOjE3LCJmZ2MiOiIjMDI0MTA2IiwiYmdjIjoiI0ZGRkZGRiIsInQiOjF9/U3RhcnQgR2FtZQ/terasong.png"
-					alt=""
+					alt="Start Game"
 				/>
 			</button>
 		</div>

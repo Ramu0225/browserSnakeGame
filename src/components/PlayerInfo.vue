@@ -5,20 +5,24 @@
 				<div class="icon-circle">
 					<img
 						src="https://img.icons8.com/pastel-glyph/20/000000/person-male--v3.png"
+						alt="Player"
 					/>
 				</div>
 				<span>{{ playerName || "Player" }}</span>
 			</div>
 			<div class="square">
 				<div class="icon-circle">
-					<img src="https://img.icons8.com/doodle/20/000000/apple.png" />
+					<img src="https://img.icons8.com/doodle/20/000000/apple.png" alt="score"/>
 				</div>
 				{{ score }}
 			</div>
 		</div>
 		<div class="square">
 			<div class="icon-circle">
-				<img src="https://img.icons8.com/material-rounded/20/000000/alarm-clock--v1.png"/>
+				<img
+					src="https://img.icons8.com/material-rounded/20/000000/alarm-clock--v1.png"
+					alt="Time"
+				/>
 			</div>
 			{{ `${displayGameTimeMinutes}:${displayGameTimeSeconds}` }}
 		</div>
@@ -49,7 +53,7 @@ export default defineComponent({
 					startTimer();
 				} else {
 					stopTimer();
-					// TODO: get top10 members from backend and update the members every 1min
+
 					const players = localStorage.getItem("snakeGame");
 					const snakeGameMembers = players ? JSON.parse(players) : [];
 					if (snakeGameMembers) {
@@ -144,18 +148,12 @@ export default defineComponent({
 	.icon-circle {
 		position: absolute;
 		top: 0;
-		//bottom:2px;
-		left: 0px;
-		//padding: 0px;
-		//margin-bottom: 12px;
+		left: 0;
 		z-index: 2;
 		display: flex;
 		flex-direction: row;
 		justify-content: center;
 		align-items: center;
-		width: 20px;
-		height: 20px;
-		//background-color: rgb(224, 108, 13);
 		border: 1px solid #33cc00;
 		border-radius: 50%;
 	}

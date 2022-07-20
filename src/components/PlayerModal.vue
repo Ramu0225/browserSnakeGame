@@ -97,7 +97,6 @@ export default defineComponent({
 		flex-direction: column;
 		width: 300px;
 		border-radius: 5px;
-		//background-color: rgb(224, 108, 13);
 		background-color: #33cc00;
 		border: 2px solid rgb(224, 108, 13);
 		padding: 10px;
