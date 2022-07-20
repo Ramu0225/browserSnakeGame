@@ -26,7 +26,7 @@
 </template>
 
 <script lang="ts">
-import { ref, watch, defineComponent } from "vue";
+import { ref, watch, defineComponent, onMounted } from "vue";
 export default defineComponent({
 	props: {
 		playerName: String,

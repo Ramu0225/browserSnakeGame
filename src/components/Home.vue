@@ -58,7 +58,6 @@ h3 {
 	width: 50vw;
 }
 
-
 img {
 	width: 80%;
 }

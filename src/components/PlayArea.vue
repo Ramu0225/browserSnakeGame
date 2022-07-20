@@ -9,7 +9,10 @@
 	>
 		<div class="modal-content">
 			<div v-if="isGameOverDialog" class="gameover">
-				<h1>Game over!</h1>
+				<img
+					src="https://see.fontimg.com/api/renderfont4/mLZ3a/eyJyIjoiZnMiLCJoIjozMywidyI6MTAwMCwiZnMiOjMzLCJmZ2MiOiIjMDI0MTA2IiwiYmdjIjoiI0ZGRkZGRiIsInQiOjF9/R2FtZSBPdmVyIQ/terasong.png"
+					alt=""
+				/>
 			</div>
 			<div v-else>
 				<input
@@ -30,6 +33,7 @@
 					:gameOver="gameOver"
 					:isPlaying="isPlaying"
 					:updateLeaderBoard="updateTop10Members"
+					:speed="speed"
 				></PlayerInfo>
 				<canvas width="500" height="500" class="canvas" ref="playArea"></canvas>
 			</div>
@@ -43,6 +47,7 @@
 import PlayerInfo from "@/components/PlayerInfo.vue";
 import LeaderBoard from "@/components/LeaderBoard.vue";
 import PlayerModal from "@/components/PlayerModal.vue";
+import gsap from "gsap";
 
 import {
 	defineComponent,
@@ -67,8 +72,6 @@ export default defineComponent({
 		let context: CanvasRenderingContext2D | null;
 		const direction = ref<Direction>("e");
 
-		const snakeHeadX = ref(120);
-		const snakeHeadY = ref(120);
 		let dx = 0;
 		let dy = 0;
 		const score = ref(0);
@@ -86,8 +89,8 @@ export default defineComponent({
 		let appleX = 0;
 		let appleY = 0;
 		let snakeLength = 3;
-		let blockSize = 10;
-		let speed = 200;
+		let blockSize = 20;
+		let speed = 300;
 		let top10Players = ref<Array<PlayerInfoContract>>([]);
 		const snakeAteApple = computed(() => {
 			const head = snakeBody.value[snakeBody.value.length - 1];
@@ -152,19 +155,41 @@ export default defineComponent({
 			if (context) {
 				appleX = getRandomInt();
 				appleY = getRandomInt();
-				context.fillStyle = "red";
-				// context.fillRect(appleX, appleY, blockSize, blockSize);
+				console.log(appleX, appleY, "draw apple");
 
+				//context.fillRect(appleX, appleY, blockSize, blockSize);
+				var gradient = context.createRadialGradient(
+					appleX + blockSize / 2,
+					appleY + blockSize / 2,
+					2,
+					appleX + blockSize / 2,
+					appleY + blockSize / 2,
+					5
+				);
+				gradient.addColorStop(0, "#e88309");
+				gradient.addColorStop(1, "#da3e13");
 				context.beginPath();
-				context.arc(appleX + 5, appleY + 5, 4, 0, 2 * Math.PI, false);
+				context.arc(
+					appleX + blockSize / 2,
+					appleY + blockSize / 2,
+					blockSize / 2 - 1,
+					0,
+					2 * Math.PI,
+					false
+				);
+				context.fillStyle = gradient;
 				context.fill();
-				// var img = new Image();
-				// img.src = "./assets/logo.png"; // Put the path to you SVG image here.
-				// img.onload = function () {
-				// 	if (context) {
-				// 		context.drawImage(img, appleX, appleY);
-				// 	}
-				// };
+				context.beginPath();
+				context.arc(
+					appleX + blockSize / 5,
+					appleY + blockSize / 2.5,
+					blockSize / 2.5,
+					-(2 * Math.PI) / 4,
+					0,
+					false
+				);
+				context.fillStyle = "#2f2823";
+				context.fill();
 			}
 		};
 		const closeModal = () => {
@@ -183,20 +208,20 @@ export default defineComponent({
 			direction.value = newDirection;
 			switch (newDirection) {
 				case "e":
-					dx = 10;
+					dx = blockSize;
 					dy = 0;
 					break;
 				case "s":
 					dx = 0;
-					dy = 10;
+					dy = blockSize;
 					break;
 				case "w":
-					dx = -10;
+					dx = -blockSize;
 					dy = 0;
 					break;
 				case "n":
 					dx = 0;
-					dy = -10;
+					dy = -blockSize;
 					break;
 			}
 			updateStartPlay(true);
@@ -233,8 +258,18 @@ export default defineComponent({
 		watch(gameOver, (isGameOver) => {
 			if (isGameOver) {
 				updateGameStart(false);
-				updateGameOverDialog(true);
-				openModal();
+
+				gsap.to(".canvas", {
+					duration: 0.1,
+					x: "+=20",
+					yoyo: true,
+					repeat: 11,
+					ease: "Power2.easeInOut",
+					onComplete: () => {
+						updateGameOverDialog(true);
+						openModal();
+					},
+				});
 			}
 		});
 
@@ -270,8 +305,13 @@ export default defineComponent({
 		const updateScore = () => {
 			score.value++;
 		};
+		const updateSpeedLevel = () => {
+			speed /= 2;
+		};
 		const getRandomInt = () => {
-			return Math.floor(Math.random() * 49) * blockSize;
+			return (
+				Math.floor(Math.random() * ((500 - blockSize) / blockSize)) * blockSize
+			);
 		};
 		const clearPlayArea = () => {
 			if (!context) {
@@ -290,11 +330,9 @@ export default defineComponent({
 		const restartGame = () => {
 			updateStartPlay(false);
 			clearPlayArea();
-			snakeHeadX.value = 120;
-			snakeHeadY.value = 120;
 			snakeBody.value = [
+				[80, 120],
 				[100, 120],
-				[110, 120],
 				[120, 120],
 			];
 			snakeLength = 3;
@@ -305,6 +343,7 @@ export default defineComponent({
 			score.value = 0;
 			closeModal();
 			updateGameOverDialog(false);
+			speed = 300;
 		};
 		const restartGameOnSwitchingUser = () => {
 			playerName.value = "";
@@ -321,6 +360,7 @@ export default defineComponent({
 		const removeEventListners = () => {
 			window.removeEventListener("keydown", handleArrowKeys);
 		};
+
 		onMounted(() => {
 			const canvas = playArea.value;
 			if (canvas) {
@@ -352,6 +392,11 @@ export default defineComponent({
 				main();
 			}
 		});
+		watch(score, (newScore) => {
+			if (newScore % 5 === 0) {
+				updateSpeedLevel();
+			}
+		});
 
 		return {
 			playArea,
@@ -367,12 +412,15 @@ export default defineComponent({
 			restartGame,
 			restartGameOnSwitchingUser,
 			isGameOverDialog,
+			speed,
 		};
 	},
 });
 </script>
 <style scoped lang="scss">
 canvas {
+	width: 500px;
+	height: 500px;
 	display: block;
 	border: 12px solid rgb(224, 108, 13);
 	border-radius: 5px;
@@ -384,8 +432,6 @@ input {
 	outline: none;
 	border: 2px solid rgb(224, 108, 13);
 	border-radius: 5px;
-}
-.gameover {
 }
 .container {
 	display: flex;
@@ -403,6 +449,21 @@ input {
 			margin: 20px 10px 0px;
 			border-radius: 5px;
 		}
+	}
+}
+@media (max-width: 500px) {
+	canvas {
+		width: 250px;
+		height: 250px;
+	}
+	.board {
+		display: none;
+	}
+}
+@media (max-width: 740px) {
+	canvas {
+		width: 300px;
+		height: 300px;
 	}
 }
 </style>

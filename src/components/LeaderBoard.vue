@@ -1,6 +1,11 @@
 <template>
 	<div class="leader-board">
-		<h1>Leader Board</h1>
+		<div class="leader-board-header">
+			<img
+				src="https://see.fontimg.com/api/renderfont4/mLZ3a/eyJyIjoiZnMiLCJoIjoxNywidyI6MTAwMCwiZnMiOjE3LCJmZ2MiOiIjMDI0MTA2IiwiYmdjIjoiI0ZGRkZGRiIsInQiOjF9/TGVhZGVyIEJvYXJk/terasong.png"
+				alt=""
+			/>
+		</div>
 		<div class="table-list">
 			<ul>
 				<li class="table heading">
@@ -46,21 +51,23 @@ ul {
 	margin: 0;
 	padding: 10px 5px;
 	border-radius: 5px;
-
 }
 .table-list {
 	border-radius: 5px;
 	background-color: #33cc00;
-	
+}
+.leader-board-header{
+	margin-bottom: 20px;
 }
 .leader-board {
-	margin: 10px;
+	margin: 5px;
+	padding: 5px;
 	font-size: 12px;
 }
-.table-img{
-img{
-	margin-left: 0px;
-}
+.table-img {
+	img {
+		margin-left: 0px;
+	}
 }
 .table {
 	display: grid;
@@ -69,8 +76,7 @@ img{
 	padding: 10px;
 	font-style: italic;
 	font-size: 15px;
-	
-	
+
 	&.heading {
 		font-weight: 600;
 	}

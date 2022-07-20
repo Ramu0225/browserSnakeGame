@@ -89,6 +89,7 @@ export default defineComponent({
 	top: offset;
 	left: offset;
 	background-color: rgba(255, 255, 255, 0.7);
+	z-index: 10;
 	.modal-container {
 		display: flex;
 		justify-content: space-between;

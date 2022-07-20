@@ -51,5 +51,10 @@ button {
 		background-color: #97b738;
 		transform: scale(1.09);
 	}
+	@media (max-width: 500px) {
+		#app {
+			height: auto;
+		}
+	}
 }
 </style>
