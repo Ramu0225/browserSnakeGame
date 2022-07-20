@@ -6,13 +6,24 @@
 					<!-- Modal Content -->
 					<slot />
 					<div v-if="gameOverModal">
-						<button @click="restart" class = "btn-play" type="button">Play Again</button>
-						<button @click="restartGameOnSwitchingUser" class = "btn-play" type="button">
+						<button @click="restart" class="btn-play" type="button">
+							Play Again
+						</button>
+						<button
+							@click="restartGameOnSwitchingUser"
+							class="btn-play"
+							type="button"
+						>
 							Switch User
 						</button>
 					</div>
 					<div v-else>
-						<button @click="close" class = "btn-play" type="button" :disabled="buttonDisabled">
+						<button
+							@click="close"
+							class="btn-play"
+							type="button"
+							:disabled="buttonDisabled"
+						>
 							Play!
 						</button>
 					</div>
@@ -56,10 +67,10 @@ export default defineComponent({
 	opacity: 0;
 }
 .modal-inner-enter-active {
-	transition: all 0.3s;
+	transition: all 0.1s;
 }
 .modal-inner-leave-active {
-	transition: all 0.3s;
+	transition: all 0.1s;
 }
 .modal-inner-enter-from {
 	opacity: 0;
@@ -72,32 +83,30 @@ export default defineComponent({
 	display: flex;
 	justify-content: center;
 	align-items: center;
-	height: 100vh;
-	width: 100vw;
+	height: 550px;
+	width: 525px;
 	position: fixed;
-	top: 0;
-	left: 0;
+	top: offset;
+	left: offset;
 	background-color: rgba(255, 255, 255, 0.7);
 	.modal-container {
-		
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
 		flex-direction: column;
 		width: 300px;
 		border-radius: 5px;
-		background-color: #fff;
+		//background-color: rgb(224, 108, 13);
+		background-color: #33cc00;
+		border: 2px solid rgb(224, 108, 13);
 		padding: 10px;
-	
-		}
-		.btn-play{
-			margin: 10px;
-			color:rgb(39, 93, 39);
-		}
-		button[disabled] {
-			pointer-events: none;
-			
-		}
 	}
-
+	.btn-play {
+		margin: 10px;
+		color: rgb(39, 93, 39);
+	}
+	button[disabled] {
+		pointer-events: none;
+	}
+}
 </style>

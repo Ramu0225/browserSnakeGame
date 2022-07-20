@@ -2,16 +2,24 @@
 	<div class="info-container">
 		<div class="info">
 			<div class="square">
-				<div class="icon-circle">C</div>
+				<div class="icon-circle">
+					<img
+						src="https://img.icons8.com/pastel-glyph/20/000000/person-male--v3.png"
+					/>
+				</div>
 				<span>{{ playerName || "Player" }}</span>
 			</div>
 			<div class="square">
-				<div class="icon-circle">C</div>
+				<div class="icon-circle">
+					<img src="https://img.icons8.com/doodle/20/000000/apple.png" />
+				</div>
 				{{ score }}
 			</div>
 		</div>
 		<div class="square">
-			<div class="icon-circle">C</div>
+			<div class="icon-circle">
+				<img src="https://img.icons8.com/ios/18/000000/hourglass.png" />
+			</div>
 			{{ `${displayGameTimeMinutes}:${displayGameTimeSeconds}` }}
 		</div>
 	</div>
@@ -51,7 +59,9 @@ export default defineComponent({
 							timeElapsed: `${displayGameTimeMinutes.value}:${displayGameTimeSeconds.value}`,
 						});
 						localStorage.setItem("snakeGame", JSON.stringify(snakeGameMembers));
-						props.updateLeaderBoard(snakeGameMembers);
+						if (props.updateLeaderBoard) {
+							props.updateLeaderBoard(snakeGameMembers);
+						}
 					}
 					updateDisplaySeconds(0);
 					updateDisplayMinutes(0);
@@ -121,16 +131,23 @@ export default defineComponent({
 	}
 	.square {
 		width: 60px;
-		background-color: gold;
-		padding: 5px 10px;
+		background-color: #33cc00;
+		margin: 1px;
+		padding: 4.5px 0px 4.5px 10px;
 		border-radius: 15px;
 		font-size: 10px;
+		font-weight: bold;
 		position: relative;
+		font-family: "Lucida Sans", "Lucida Sans Regular", "Lucida Grande",
+			"Lucida Sans Unicode", Geneva, Verdana, sans-serif;
 	}
 	.icon-circle {
 		position: absolute;
 		top: 0;
-		left: -5px;
+		//bottom:2px;
+		left: 0px;
+		//padding: 0px;
+		//margin-bottom: 12px;
 		z-index: 2;
 		display: flex;
 		flex-direction: row;
@@ -138,8 +155,8 @@ export default defineComponent({
 		align-items: center;
 		width: 20px;
 		height: 20px;
-		background-color: red;
-		border: 1px solid black;
+		//background-color: rgb(224, 108, 13);
+		border: 1px solid #33cc00;
 		border-radius: 50%;
 	}
 }

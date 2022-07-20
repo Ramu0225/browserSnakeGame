@@ -65,45 +65,49 @@ export default defineComponent({
 	setup() {
 		const playArea = ref<HTMLCanvasElement | null>(null);
 		let context: CanvasRenderingContext2D | null;
-		const direction = ref<Direction>("");
+		const direction = ref<Direction>("e");
 
 		const snakeHeadX = ref(120);
 		const snakeHeadY = ref(120);
+		let dx = 0;
+		let dy = 0;
 		const score = ref(0);
-		const snakeBody = ref([
+		let snakeBody = ref([
 			[100, 120],
 			[110, 120],
 			[120, 120],
 		]);
 		const playerName = ref("");
 		const isPlaying = ref(false);
-		const modalActive = ref(false);
+		const modalActive = ref(true);
 		const isGameOverDialog = ref(false);
+		let changingDirection = false;
+		const startedPlaying = ref(false);
 		let appleX = 0;
 		let appleY = 0;
 		let snakeLength = 3;
 		let blockSize = 10;
 		let speed = 200;
-		let interval = 0;
 		let top10Players = ref<Array<PlayerInfoContract>>([]);
 		const snakeAteApple = computed(() => {
-			return appleX === snakeHeadX.value && appleY === snakeHeadY.value;
+			const head = snakeBody.value[snakeBody.value.length - 1];
+			return appleX === head[0] && appleY === head[1];
 		});
 		const gameOver = computed(() => {
+			const head = snakeBody.value[snakeBody.value.length - 1];
 			return (
 				isSnakeCollide.value ||
-				snakeHeadX.value < 0 ||
-				snakeHeadY.value < 0 ||
-				snakeHeadX.value > 490 ||
-				snakeHeadY.value > 490
+				head[0] < 0 ||
+				head[1] < 0 ||
+				head[0] > 490 ||
+				head[1] > 490
 			);
 		});
 		const isSnakeCollide = computed(() => {
+			const head = snakeBody.value[snakeBody.value.length - 1];
 			return (snakeBody.value || []).some(([x, y], i) => {
 				return (
-					i !== snakeBody.value.length - 1 &&
-					x === snakeHeadX.value &&
-					y === snakeHeadY.value
+					i !== snakeBody.value.length - 1 && x === head[0] && y === head[1]
 				);
 			});
 		});
@@ -111,36 +115,31 @@ export default defineComponent({
 			isPlaying.value = value;
 		};
 		const handleArrowKeys = (e: KeyboardEvent) => {
+			if (changingDirection) return;
 			switch (e.key.toLowerCase()) {
 				case "arrowright":
 				case "d":
-					if (direction.value === "w" || direction.value === "e") return;
-					pause();
-					direction.value = "e";
+					if (direction.value === "w") return;
+					excuteDirection("e");
 					break;
 				case "arrowdown":
 				case "s":
-					if (direction.value === "n" || direction.value === "s") return;
-					pause();
-					direction.value = "s";
+					if (direction.value === "n") return;
+					excuteDirection("s");
 					break;
 				case "arrowleft":
 				case "a":
-					if (direction.value === "e" || direction.value === "w") return;
-					pause();
-					direction.value = "w";
+					if (direction.value === "e") return;
+					excuteDirection("w");
 					break;
 				case "arrowup":
 				case "w":
-					if (direction.value === "s" || direction.value === "n") return;
-					pause();
-					direction.value = "n";
+					if (direction.value === "s") return;
+					excuteDirection("n");
 					break;
 			}
 		};
-		const pause = () => {
-			clearInterval(interval);
-		};
+
 		const drawSnake = () => {
 			snakeBody.value.forEach((part) => {
 				if (context) {
@@ -151,40 +150,56 @@ export default defineComponent({
 		};
 		const drawApple = () => {
 			if (context) {
-				context.fillStyle = "red";
 				appleX = getRandomInt();
 				appleY = getRandomInt();
-				context.fillRect(appleX, appleY, blockSize, blockSize);
+				context.fillStyle = "red";
+				// context.fillRect(appleX, appleY, blockSize, blockSize);
+
+				context.beginPath();
+				context.arc(appleX + 5, appleY + 5, 4, 0, 2 * Math.PI, false);
+				context.fill();
+				// var img = new Image();
+				// img.src = "./assets/logo.png"; // Put the path to you SVG image here.
+				// img.onload = function () {
+				// 	if (context) {
+				// 		context.drawImage(img, appleX, appleY);
+				// 	}
+				// };
 			}
 		};
 		const closeModal = () => {
 			modalActive.value = false;
-			//addEventListners();
+			addEventListners();
 		};
 		const openModal = () => {
 			modalActive.value = true;
+			removeEventListners();
 		};
-		const excuteDirection = (direction: Direction) => {
+		const excuteDirection = (newDirection: Direction) => {
 			if (gameOver.value) {
-				pause();
 				return;
 			}
-
-			switch (direction) {
+			changingDirection = true;
+			direction.value = newDirection;
+			switch (newDirection) {
 				case "e":
-					snakeHeadX.value += blockSize;
+					dx = 10;
+					dy = 0;
 					break;
 				case "s":
-					snakeHeadY.value += blockSize;
+					dx = 0;
+					dy = 10;
 					break;
 				case "w":
-					snakeHeadX.value -= blockSize;
+					dx = -10;
+					dy = 0;
 					break;
 				case "n":
-					snakeHeadY.value -= blockSize;
+					dx = 0;
+					dy = -10;
 					break;
 			}
-			moveSnake();
+			updateStartPlay(true);
 		};
 		const updateTop10Members = (players: Array<PlayerInfoContract>) => {
 			if (!players) {
@@ -212,6 +227,9 @@ export default defineComponent({
 				top10Players.value = sortedMembers.slice(0, 10);
 			}
 		};
+		const updateStartPlay = (pressedArrowKey: boolean) => {
+			startedPlaying.value = pressedArrowKey;
+		};
 		watch(gameOver, (isGameOver) => {
 			if (isGameOver) {
 				updateGameStart(false);
@@ -219,12 +237,7 @@ export default defineComponent({
 				openModal();
 			}
 		});
-		watch(direction, (newDirection) => {
-			if (gameOver.value) {
-				return;
-			}
-			interval = setInterval(() => excuteDirection(newDirection), speed);
-		});
+
 		const moveSnake = () => {
 			if (snakeAteApple.value) {
 				snakeLength += 1;
@@ -237,15 +250,11 @@ export default defineComponent({
 			if (gameOver.value) {
 				return;
 			}
-			snakeBody.value.push([snakeHeadX.value, snakeHeadY.value]);
-			context.fillStyle = "black";
-			context.strokeStyle = "yellow";
-			context.fillRect(
-				snakeHeadX.value,
-				snakeHeadY.value,
-				blockSize,
-				blockSize
-			);
+			snakeBody.value.push([
+				snakeBody.value[snakeBody.value.length - 1][0] + dx,
+				snakeBody.value[snakeBody.value.length - 1][1] + dy,
+			]);
+			drawSnake();
 			if (snakeBody.value.length > snakeLength) {
 				const firstBodyPart = snakeBody.value.shift();
 				if (firstBodyPart) {
@@ -278,28 +287,28 @@ export default defineComponent({
 		const updateGameOverDialog = (isOpen: boolean) => {
 			isGameOverDialog.value = isOpen;
 		};
-
 		const restartGame = () => {
+			updateStartPlay(false);
 			clearPlayArea();
+			snakeHeadX.value = 120;
+			snakeHeadY.value = 120;
 			snakeBody.value = [
 				[100, 120],
 				[110, 120],
 				[120, 120],
 			];
 			snakeLength = 3;
-			direction.value = "";
+			direction.value = "e";
 			isPlaying.value = false;
-			snakeHeadX.value = 120;
-			snakeHeadY.value = 120;
 			drawSnake();
 			drawApple();
 			score.value = 0;
-			updateGameOverDialog(false);
 			closeModal();
+			updateGameOverDialog(false);
 		};
 		const restartGameOnSwitchingUser = () => {
-			restartGame();
 			playerName.value = "";
+			restartGame();
 			updateGameOverDialog(false);
 			openModal();
 		};
@@ -308,6 +317,9 @@ export default defineComponent({
 				updateGameStart(true);
 				window.addEventListener("keydown", handleArrowKeys);
 			}
+		};
+		const removeEventListners = () => {
+			window.removeEventListener("keydown", handleArrowKeys);
 		};
 		onMounted(() => {
 			const canvas = playArea.value;
@@ -318,13 +330,29 @@ export default defineComponent({
 			drawApple();
 			const players = localStorage.getItem("snakeGame");
 			const parsedPlayers = players ? JSON.parse(players) : [];
-			console.log(parsedPlayers);
 			updateTop10Members(parsedPlayers);
-			openModal();
 		});
 		onUnmounted(() => {
 			window.removeEventListener("keydown", handleArrowKeys);
 		});
+
+		const main = () => {
+			if (gameOver.value) {
+				return;
+			}
+			changingDirection = false;
+			setTimeout(() => {
+				moveSnake();
+				main();
+			}, speed);
+		};
+
+		watch(startedPlaying, () => {
+			if (startedPlaying.value) {
+				main();
+			}
+		});
+
 		return {
 			playArea,
 			score,
@@ -352,9 +380,9 @@ canvas {
 	background-image: url(http://www.transparenttextures.com/patterns/45-degree-fabric-dark.png);
 }
 input {
-	padding: 10px;
+	padding: 6px;
 	outline: none;
-	border: 2px solid black;
+	border: 2px solid rgb(224, 108, 13);
 	border-radius: 5px;
 }
 .gameover {

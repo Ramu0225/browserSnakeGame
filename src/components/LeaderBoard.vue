@@ -1,26 +1,42 @@
 <template>
-	<h1>Leader Board</h1>
-	<ul>
-		<li class="table heading">
-			<div>Player</div>
-			<div>Score</div>
-			<div>Time</div>
-		</li>
-		<li class="table" v-for="(item, index) in players" :key="index">
-			<div>{{ item.name }}</div>
-			<div>{{ item.score }}</div>
-			<div>{{ item.timeElapsed || 0 }}</div>
-		</li>
-	</ul>
+	<div class="leader-board">
+		<h1>Leader Board</h1>
+		<div class="table-list">
+			<ul>
+				<li class="table heading">
+					<div>Player</div>
+					<div>Score</div>
+					<div>Time</div>
+				</li>
+				<li class="table" v-for="(item, index) in players" :key="index">
+					<div v-if="index == 0" class="table-img">
+						<img src="https://img.icons8.com/officel/20/000000/medal2.png" />{{
+							item.name
+						}}
+					</div>
+					<div v-if="index == 1">
+						<img
+							src="https://img.icons8.com/officel/20/000000/medal-second-place.png"
+						/>{{ item.name }}
+					</div>
+					<div v-if="index == 2">
+						<img
+							src="https://img.icons8.com/officel/20/000000/medal2-third-place.png"
+						/>{{ item.name }}
+					</div>
+					<div v-if="index > 2">{{ item.name }}</div>
+					<div>{{ item.score }}</div>
+					<div>{{ item.timeElapsed || 0 }}</div>
+				</li>
+			</ul>
+		</div>
+	</div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
 export default defineComponent({
 	props: ["players"],
-	setup(props) {
-		console.log(props);
-	},
 });
 </script>
 
@@ -29,16 +45,32 @@ export default defineComponent({
 ul {
 	margin: 0;
 	padding: 10px 5px;
+	border-radius: 5px;
+
 }
-h1 {
-	font-size: 1em;
+.table-list {
+	border-radius: 5px;
+	background-color: #33cc00;
+	
+}
+.leader-board {
+	margin: 10px;
+	font-size: 12px;
+}
+.table-img{
+img{
+	margin-left: 0px;
+}
 }
 .table {
 	display: grid;
-	grid-template-columns: 2fr 1fr 2fr;
-	max-width: 250px;
+	grid-template-columns: 3fr 3fr 2fr;
+	max-width: 320px;
 	padding: 10px;
 	font-style: italic;
+	font-size: 15px;
+	
+	
 	&.heading {
 		font-weight: 600;
 	}
