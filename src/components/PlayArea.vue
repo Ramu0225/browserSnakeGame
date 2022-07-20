@@ -71,13 +71,12 @@ export default defineComponent({
 		const playArea = ref<HTMLCanvasElement | null>(null);
 		let context: CanvasRenderingContext2D | null;
 		const direction = ref<Direction>("e");
-
 		let dx = 0;
 		let dy = 0;
 		const score = ref(0);
 		let snakeBody = ref([
+			[80, 120],
 			[100, 120],
-			[110, 120],
 			[120, 120],
 		]);
 		const playerName = ref("");
@@ -92,6 +91,7 @@ export default defineComponent({
 		let blockSize = 20;
 		let speed = 300;
 		let top10Players = ref<Array<PlayerInfoContract>>([]);
+		let obstacleCordinates = [0, 0];
 		const snakeAteApple = computed(() => {
 			const head = snakeBody.value[snakeBody.value.length - 1];
 			return appleX === head[0] && appleY === head[1];
@@ -103,7 +103,8 @@ export default defineComponent({
 				head[0] < 0 ||
 				head[1] < 0 ||
 				head[0] > 490 ||
-				head[1] > 490
+				head[1] > 490 ||
+				(head[0] === obstacleCordinates[0] && head[1] === obstacleCordinates[1])
 			);
 		});
 		const isSnakeCollide = computed(() => {
@@ -116,6 +117,47 @@ export default defineComponent({
 		});
 		const updateGameStart = (value: boolean) => {
 			isPlaying.value = value;
+		};
+		const addObstacles = () => {
+			if (context) {
+				context.clearRect(
+					obstacleCordinates[0],
+					obstacleCordinates[1],
+					blockSize,
+					blockSize
+				);
+				obstacleCordinates = [getRandomInt(), getRandomInt()];
+				const hasSnakeCordinates = hasSnakeCoridnates(
+					obstacleCordinates[0],
+					obstacleCordinates[1]
+				);
+				if (hasSnakeCordinates) {
+					console.log("has snake apple cor");
+					addObstacles();
+					return;
+				}
+				var gradient = context.createRadialGradient(
+					obstacleCordinates[0] + blockSize / 2,
+					obstacleCordinates[1] + blockSize / 2,
+					2,
+					obstacleCordinates[0] + blockSize / 2,
+					obstacleCordinates[1] + blockSize / 2,
+					5
+				);
+				gradient.addColorStop(0, "yellow");
+				gradient.addColorStop(1, "red");
+				context.beginPath();
+				context.arc(
+					obstacleCordinates[0] + blockSize / 2,
+					obstacleCordinates[1] + blockSize / 2,
+					blockSize / 2 - 1,
+					0,
+					(2 * Math.PI) / 2,
+					false
+				);
+				context.fillStyle = gradient;
+				context.fill();
+			}
 		};
 		const handleArrowKeys = (e: KeyboardEvent) => {
 			if (changingDirection) return;
@@ -143,11 +185,50 @@ export default defineComponent({
 			}
 		};
 
+		const drawCircle = (
+			x: number,
+			y: number,
+			radius: number,
+			counterClockWise: boolean,
+			color: string
+		) => {
+			if (context) {
+				context.fillStyle = color;
+				context.beginPath();
+				context.arc(x, y, radius, 0, 2 * Math.PI, counterClockWise);
+				context.fill();
+			}
+		};
+
+		const hasSnakeCoridnates = (randomX: number, randomY: number) => {
+			return (snakeBody.value || []).some(([x, y]) => {
+				return x === randomX && y === randomY;
+			});
+		};
+
 		const drawSnake = () => {
-			snakeBody.value.forEach((part) => {
+			snakeBody.value.forEach((part, i) => {
 				if (context) {
-					context.fillStyle = "black";
-					context.fillRect(part[0], part[1], blockSize, blockSize);
+					const x = part[0] + blockSize / 2;
+					const y = part[1] + blockSize / 2;
+					const radius = blockSize / 2;
+					drawCircle(x, y, radius, false, "black");
+					if (snakeBody.value.length - 1 === i) {
+						const eye1X = part[0] +blockSize / 1.5;
+						const eye1Y = part[1] + blockSize / 3;
+						const eyeRadius = 2;
+						drawCircle(eye1X, eye1Y, eyeRadius, false, "yellow");
+						const eye2X = part[0] +blockSize/ 1.5;
+						const eye2Y = part[1] +blockSize/ 1.5;
+						drawCircle(eye2X, eye2Y, eyeRadius, false, "yellow");
+						context.fillStyle = "red";
+						context.lineWidth = 2;
+						context.beginPath();
+						context.moveTo(part[0] + blockSize / 2, part[1] + blockSize / 2);
+						context.lineTo(part[0] + dx, part[1] + dy);
+						context.stroke();
+						context.fill();
+					}
 				}
 			});
 		};
@@ -155,9 +236,12 @@ export default defineComponent({
 			if (context) {
 				appleX = getRandomInt();
 				appleY = getRandomInt();
-				console.log(appleX, appleY, "draw apple");
-
-				//context.fillRect(appleX, appleY, blockSize, blockSize);
+				const hasSnakeCordinates = hasSnakeCoridnates(appleX, appleY);
+				if (hasSnakeCordinates) {
+					console.log("has snake apple cor");
+					drawApple();
+					return;
+				}
 				var gradient = context.createRadialGradient(
 					appleX + blockSize / 2,
 					appleY + blockSize / 2,
@@ -255,23 +339,6 @@ export default defineComponent({
 		const updateStartPlay = (pressedArrowKey: boolean) => {
 			startedPlaying.value = pressedArrowKey;
 		};
-		watch(gameOver, (isGameOver) => {
-			if (isGameOver) {
-				updateGameStart(false);
-
-				gsap.to(".canvas", {
-					duration: 0.1,
-					x: "+=20",
-					yoyo: true,
-					repeat: 11,
-					ease: "Power2.easeInOut",
-					onComplete: () => {
-						updateGameOverDialog(true);
-						openModal();
-					},
-				});
-			}
-		});
 
 		const moveSnake = () => {
 			if (snakeAteApple.value) {
@@ -289,18 +356,13 @@ export default defineComponent({
 				snakeBody.value[snakeBody.value.length - 1][0] + dx,
 				snakeBody.value[snakeBody.value.length - 1][1] + dy,
 			]);
-			drawSnake();
 			if (snakeBody.value.length > snakeLength) {
-				const firstBodyPart = snakeBody.value.shift();
-				if (firstBodyPart) {
-					context.clearRect(
-						firstBodyPart[0],
-						firstBodyPart[1],
-						blockSize,
-						blockSize
-					);
+				const tail = snakeBody.value.shift();
+				if (tail) {
+					context.clearRect(tail[0], tail[1], blockSize, blockSize);
 				}
 			}
+			drawSnake();
 		};
 		const updateScore = () => {
 			score.value++;
@@ -323,6 +385,12 @@ export default defineComponent({
 				}
 			});
 			context.clearRect(appleX, appleY, blockSize, blockSize);
+			context.clearRect(
+				obstacleCordinates[0],
+				obstacleCordinates[1],
+				blockSize,
+				blockSize
+			);
 		};
 		const updateGameOverDialog = (isOpen: boolean) => {
 			isGameOverDialog.value = isOpen;
@@ -344,6 +412,7 @@ export default defineComponent({
 			closeModal();
 			updateGameOverDialog(false);
 			speed = 300;
+			obstacleCordinates = [0, 0];
 		};
 		const restartGameOnSwitchingUser = () => {
 			playerName.value = "";
@@ -360,7 +429,6 @@ export default defineComponent({
 		const removeEventListners = () => {
 			window.removeEventListener("keydown", handleArrowKeys);
 		};
-
 		onMounted(() => {
 			const canvas = playArea.value;
 			if (canvas) {
@@ -375,7 +443,6 @@ export default defineComponent({
 		onUnmounted(() => {
 			window.removeEventListener("keydown", handleArrowKeys);
 		});
-
 		const main = () => {
 			if (gameOver.value) {
 				return;
@@ -393,8 +460,26 @@ export default defineComponent({
 			}
 		});
 		watch(score, (newScore) => {
-			if (newScore % 5 === 0) {
+			if (newScore !== 0 && newScore % 2 === 0) {
 				updateSpeedLevel();
+				addObstacles();
+			}
+		});
+		watch(gameOver, (isGameOver) => {
+			if (isGameOver) {
+				updateGameStart(false);
+
+				gsap.to(".canvas", {
+					duration: 0.1,
+					x: "+=20",
+					yoyo: true,
+					repeat: 11,
+					ease: "Power2.easeInOut",
+					onComplete: () => {
+						updateGameOverDialog(true);
+						openModal();
+					},
+				});
 			}
 		});
 
